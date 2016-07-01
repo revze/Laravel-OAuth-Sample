@@ -24,6 +24,8 @@ Route::group(['prefix'=>'login'],function(){
   Route::get('twitter/callback','Auth\AuthController@handleTwitterCallback');
   Route::get('google','Auth\AuthController@redirectToGoogle');
   Route::get('google/callback','Auth\AuthController@handleGoogleCallback');
+  Route::get('instagram','Auth\AuthController@redirectToInstagram');
+  Route::get('instagram/callback','Auth\AuthController@handleInstagramCallback');
   Route::get('linkedin','Auth\AuthController@redirectToLinkedIn');
   Route::get('linkedin/callback','Auth\AuthController@handleLinkedInCallback');
   Route::get('github','Auth\AuthController@redirectToGithub');

@@ -9,6 +9,9 @@ use Illuminate\Foundation\Auth\ThrottlesLogins;
 use Illuminate\Foundation\Auth\AuthenticatesAndRegistersUsers;
 use Socialite;
 use Auth;
+use Illuminate\Http\Request;
+use App\Http\Requests;
+use App\Http\Controllers\InstagramController as InstagramAPI;
 
 class AuthController extends Controller
 {
@@ -93,12 +96,12 @@ class AuthController extends Controller
 
         $select_user = User::where('social_media','facebook')->where('social_media_id',$user->getId())->first();
         Auth::loginUsingId($select_user->id,true);
-        // return 'Selamat '.auth()->user()->name.' anda berhasil masuk.';
+
         return redirect('/');
       }
 
       Auth::loginUsingId($select_user->first()->id,true);
-      // return 'Selamat datang kembali '.auth()->user()->name.'.';
+
       return redirect('/');
     }
 
@@ -124,12 +127,12 @@ class AuthController extends Controller
 
         $select_user = User::where('social_media','twitter')->where('social_media_id',$user->getId())->first();
         Auth::loginUsingId($select_user->id,true);
-        // return 'Selamat '.auth()->user()->name.' anda berhasil masuk.';
+
         return redirect('/');
       }
 
       Auth::loginUsingId($select_user->first()->id,true);
-      // return 'Selamat datang kembali '.auth()->user()->name.'.';
+
       return redirect('/');
     }
 
@@ -154,13 +157,56 @@ class AuthController extends Controller
 
         $select_user = User::where('social_media','google')->where('social_media_id',$user->getId())->first();
         Auth::loginUsingId($select_user->id,true);
-        // return 'Selamat '.auth()->user()->name.' anda berhasil masuk.';
+
         return redirect('/');
       }
 
       Auth::loginUsingId($select_user->first()->id,true);
-      // return 'Selamat datang kembali '.auth()->user()->name.'.';
+
       return redirect('/');
+    }
+
+    public function redirectToInstagram()
+    {
+      $instagram_api = new InstagramAPI;
+      $instagram = $instagram_api->getToken();
+      return redirect($instagram->getLoginUrl());
+    }
+
+    public function handleInstagramCallback(Request $r)
+    {
+      $instagram_api = new InstagramAPI;
+      $instagram = $instagram_api->getToken();
+
+      if ($r->input('error_reason')=='') {
+        $code = $r->input('code');
+
+        $data = $instagram->getOAuthToken($code);
+
+        $select_user = User::where('social_media','instagram')->where('social_media_id',$data->user->id);
+
+        if ($select_user->count()==0) {
+          $create_user = new User;
+          $create_user->name = $data->user->full_name;
+          $create_user->email = '';
+          $create_user->username = $data->user->username;
+          $create_user->social_media = 'instagram';
+          $create_user->social_media_id = $data->user->id;
+          $create_user->avatar = $data->user->profile_picture;
+          $create_user->save();
+
+          $select_user = User::where('social_media','instagram')->where('social_media_id',$data->user->id)->first();
+          Auth::loginUsingId($select_user->id,true);
+
+          return redirect('/');
+        }
+
+        Auth::loginUsingId($select_user->first()->id,true);
+
+        return redirect('/');
+      }
+
+      return redirect('login');
     }
 
     public function redirectToLinkedIn()
@@ -184,12 +230,12 @@ class AuthController extends Controller
 
         $select_user = User::where('social_media','linkedin')->where('social_media_id',$user->getId())->first();
         Auth::loginUsingId($select_user->id,true);
-        // return 'Selamat '.auth()->user()->name.' anda berhasil masuk.';
+
         return redirect('/');
       }
 
       Auth::loginUsingId($select_user->first()->id,true);
-      // return 'Selamat datang kembali '.auth()->user()->name.'.';
+
       return redirect('/');
     }
 
@@ -214,12 +260,12 @@ class AuthController extends Controller
 
         $select_user = User::where('social_media','github')->where('social_media_id',$user->getId())->first();
         Auth::loginUsingId($select_user->id,true);
-        // return 'Selamat '.auth()->user()->name.' anda berhasil masuk.';
+
         return redirect('/');
       }
 
       Auth::loginUsingId($select_user->first()->id,true);
-      // return 'Selamat datang kembali '.auth()->user()->name.'.';
+
       return redirect('/');
     }
 }
